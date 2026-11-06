@@ -1,0 +1,30 @@
+---
+import Pagination from "@components/molecules/Pagination.astro";
+import PostPage from "@components/organisms/PostPage.astro";
+import type { GetStaticPaths } from "astro";
+import { postListConfig } from "@/config/postListConfig";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { getSortedPosts } from "../utils/content-utils";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const allBlogPosts = await getSortedPosts();
+	return paginate(allBlogPosts, { pageSize: postListConfig.pageSize });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+
+const len = page.data.length;
+const isSubPage = page.currentPage > 1;
+const pageTitle = isSubPage
+	? `最新机场评测与推荐列表 (第 ${page.currentPage} 页)`
+	: undefined;
+const pageDescription = isSubPage
+	? `机场blog (jichangblog.cc) 专线机场评测、三网实测与代理客户端教程列表第 ${page.currentPage} 页。`
+	: undefined;
+---
+
+<MainGridLayout title={pageTitle} description={pageDescription} page={isSubPage ? undefined : "home"}>
+	{isSubPage && <h1 class="sr-only">{pageTitle}</h1>}
+	<PostPage page={page}></PostPage>
+	<Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
+</MainGridLayout>

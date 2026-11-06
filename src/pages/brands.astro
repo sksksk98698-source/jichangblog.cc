@@ -1,0 +1,59 @@
+---
+import BrandDirectory from "@components/organisms/BrandDirectory.svelte";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { brands } from "../data/brands";
+
+const pageTitle = "42家机场品牌全库与三网测速解锁档案 (2026)";
+const pageDescription =
+	"机场blog 2026 全景机场数据库：收录光速云、暮光加速、飞猫云、微风网络、星岛梦、无忧链接等 42 家机场套餐价格、优惠码、IEPL/IPLC 专线参数及 25 张实测测速解锁截图。";
+
+const webPageSchema = {
+	"@context": "https://schema.org",
+	"@type": ["WebPage", "CollectionPage"],
+	name: pageTitle,
+	description: pageDescription,
+	url: "https://jichangblog.cc/brands/",
+	inLanguage: "zh-CN",
+};
+
+const itemListSchema = {
+	"@context": "https://schema.org",
+	"@type": "ItemList",
+	name: pageTitle,
+	description: pageDescription,
+	numberOfItems: brands.length,
+	itemListElement: brands.slice(0, 28).map((b) => ({
+		"@type": "ListItem",
+		position: b.rank,
+		name: b.name,
+		description: `${b.entry} · ${b.lines.join("/")} · ${b.summary}`,
+		url: `https://jichangblog.cc/brands/#${b.slug}`,
+	})),
+};
+
+const breadcrumbSchema = {
+	"@context": "https://schema.org",
+	"@type": "BreadcrumbList",
+	itemListElement: [
+		{
+			"@type": "ListItem",
+			position: 1,
+			name: "首页",
+			item: "https://jichangblog.cc/",
+		},
+		{
+			"@type": "ListItem",
+			position: 2,
+			name: "42家机场品牌库",
+			item: "https://jichangblog.cc/brands/",
+		},
+	],
+};
+---
+
+<MainGridLayout title={pageTitle} description={pageDescription} page="brands">
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(webPageSchema)} />
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(itemListSchema)} />
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+	<BrandDirectory client:load />
+</MainGridLayout>

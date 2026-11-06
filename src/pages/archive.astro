@@ -1,0 +1,35 @@
+---
+import PageHeader from "@components/atoms/display/PageHeader.astro";
+import ArchivePanel from "@components/organisms/ArchivePanel.svelte";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPostsList } from "../utils/content-utils";
+
+const sortedPostsList = await getSortedPostsList();
+const archiveTitle = "全部机场评测与配置文章归档";
+const archiveSummary = `机场blog 全站 ${sortedPostsList.length} 篇深度实测、专线榜单、客户端配置与防跑路避坑文章时间轴归档。`;
+
+const collectionSchema = {
+	"@context": "https://schema.org",
+	"@type": "CollectionPage",
+	name: archiveTitle,
+	description: archiveSummary,
+	url: "https://jichangblog.cc/archive/",
+};
+const breadcrumbSchema = {
+	"@context": "https://schema.org",
+	"@type": "BreadcrumbList",
+	itemListElement: [
+		{ "@type": "ListItem", position: 1, name: "首页", item: "https://jichangblog.cc/" },
+		{ "@type": "ListItem", position: 2, name: archiveTitle, item: "https://jichangblog.cc/archive/" },
+	],
+};
+---
+
+<MainGridLayout title={archiveTitle} description={archiveSummary} page="archive">
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+	<div class="sr-only">
+		<PageHeader title={archiveTitle} subtitle={archiveSummary} />
+	</div>
+	<ArchivePanel sortedPosts={sortedPostsList} client:visible></ArchivePanel>
+</MainGridLayout>

@@ -1,0 +1,41 @@
+---
+import { getEntry, render } from "astro:content";
+import Card from "@components/atoms/display/Card.svelte";
+import Markdown from "@components/content/Markdown.astro";
+import I18nKey from "@i18n/i18nKey";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { resolveI18nText } from "@utils/i18n-utils";
+import { getMarkdownStylesheetAssets } from "@utils/markdown-assets";
+import { aboutConfig } from "@/config/aboutConfig";
+
+if (!aboutConfig.enable) {
+	return Astro.redirect("/404/");
+}
+
+const pageTitle = resolveI18nText(aboutConfig.title, I18nKey.about);
+const pageDescription = resolveI18nText(aboutConfig.description, I18nKey.about);
+
+const aboutPost = await getEntry("spec", "about");
+
+if (!aboutPost) {
+	throw new Error("About page content not found");
+}
+
+const { Content, remarkPluginFrontmatter } = await render(aboutPost);
+const markdownStylesheetAssets = await getMarkdownStylesheetAssets(
+	remarkPluginFrontmatter.markdownSyntaxes,
+);
+---
+<MainGridLayout title={pageTitle} description={pageDescription} page="about">
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({ "@context": "https://schema.org", "@type": "AboutPage", name: pageTitle, description: pageDescription, url: "https://jichangblog.cc/about/" })} />
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "首页", item: "https://jichangblog.cc/" }, { "@type": "ListItem", position: 2, name: pageTitle, item: "https://jichangblog.cc/about/" }] })} />
+    {markdownStylesheetAssets.map(({ pack, css }) => <style is:inline slot="head" data-swup-optional={pack} set:html={css}></style>)}
+    <div class="flex w-full rounded-[var(--shape-corner-l)] overflow-hidden relative min-h-32">
+        <Card color="var(--card-bg)" radius="l" class="z-10 p-6 lg:p-8 relative w-full">
+            <h1 class="text-2xl md:text-3xl font-bold text-[var(--on-surface)] mb-4">{pageTitle}</h1>
+            <Markdown class="mt-2">
+                <Content />
+            </Markdown>
+        </Card>
+    </div>
+</MainGridLayout>
